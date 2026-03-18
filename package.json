@@ -1,0 +1,31 @@
+{
+  "name": "ipassbox",
+  "version": "1.0.0",
+  "description": "iPassBox - 安全加密的本地密码管理应用",
+  "main": "dist/main/main/main.js",
+  "author": "oahx",
+  "license": "MIT",
+  "scripts": {
+    "dev": "npm run build:main && electron .",
+    "build": "npm run build:renderer && npm run build:main",
+    "build:renderer": "vite build",
+    "build:main": "tsc -p tsconfig.main.json",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron-log": "^5.1.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.56",
+    "@types/react-dom": "^18.2.19",
+    "@types/uuid": "^9.0.8",
+    "@vitejs/plugin-react": "^4.2.1",
+    "electron": "^28.3.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.4"
+  }
+}
