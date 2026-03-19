@@ -94,6 +94,10 @@
   "settings": {
     "title": "设置",
     "security": "安全设置",
+    "theme": "主题",
+    "themeDescription": "选择应用程序主题",
+    "themeLight": "浅色",
+    "themeDark": "深色",
     "autoLockTimeout": "自动锁定时间",
     "autoLockDescription": "闲置多长时间后自动锁定应用",
     "changeMasterPassword": "修改主密码",
@@ -123,6 +127,14 @@
     "tip2": "定期备份您的数据以防数据丢失",
     "tip3": "建议使用密码生成器创建强密码",
     "tip4": "您的所有数据都存储在本地，不会上传到云端"
+  },
+  "shortcuts": {
+    "title": "快捷键",
+    "addNew": "添加新条目",
+    "search": "聚焦搜索框",
+    "lock": "锁定应用",
+    "settings": "打开设置",
+    "escape": "关闭弹窗"
   },
   "backup": {
     "export": "导出数据",

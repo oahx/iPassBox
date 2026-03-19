@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '../context/I18nContext';
 import type { PasswordEntry } from '@shared/types';
+import { copyToClipboard } from '../utils/clipboard';
 import './PasswordDetail.css';
 
 interface PasswordDetailProps {
@@ -34,14 +35,11 @@ function PasswordDetail({ entry, onEdit, onDelete }: PasswordDetailProps) {
     );
   }
 
-  const copyToClipboard = async (text: string, field: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
+  const handleCopy = async (text: string, field: string) => {
+    await copyToClipboard(text, () => {
       setCopiedField(field);
       setTimeout(() => setCopiedField(null), 2000);
-    } catch (error) {
-      console.error('Failed to copy:', error);
-    }
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -76,7 +74,7 @@ function PasswordDetail({ entry, onEdit, onDelete }: PasswordDetailProps) {
             <label>{t('password.url')}</label>
             <div className="field-value">
               <span className="value-text">{entry.url}</span>
-              <button className="copy-btn" onClick={() => copyToClipboard(entry.url!, 'url')}>
+              <button className="copy-btn" onClick={() => handleCopy(entry.url!, 'url')}>
                 {copiedField === 'url' ? t('password.copied') : t('password.copyPassword').replace('Copy ', '')}
               </button>
             </div>
@@ -87,7 +85,7 @@ function PasswordDetail({ entry, onEdit, onDelete }: PasswordDetailProps) {
           <label>{t('password.username')}</label>
           <div className="field-value">
             <span className="value-text">{entry.username || '-'}</span>
-            <button className="copy-btn" onClick={() => copyToClipboard(entry.username!, 'username')}>
+            <button className="copy-btn" onClick={() => handleCopy(entry.username!, 'username')}>
               {copiedField === 'username' ? t('password.copied') : t('password.copyUsername').replace('Copy ', '')}
             </button>
           </div>
@@ -113,7 +111,7 @@ function PasswordDetail({ entry, onEdit, onDelete }: PasswordDetailProps) {
                   </svg>
                 )}
               </button>
-              <button className="copy-btn" onClick={() => copyToClipboard(entry.password, 'password')}>
+              <button className="copy-btn" onClick={() => handleCopy(entry.password, 'password')}>
                 {copiedField === 'password' ? t('password.copied') : t('password.copyPassword').replace('Copy ', '')}
               </button>
             </div>

@@ -356,6 +356,177 @@ export function exportData(filePath: string): boolean {
   return true;
 }
 
+export function exportDataAsJson(filePath: string): boolean {
+  if (!derivedKey) {
+    throw new Error('Not authenticated');
+  }
+  
+  const exportData = {
+    version: '1.0.0',
+    exportedAt: new Date().toISOString(),
+    entries: entries.map(e => ({
+      name: e.name,
+      url: e.url,
+      username: e.username,
+      password: e.password,
+      notes: e.notes,
+      category: e.category,
+      createdAt: e.createdAt,
+      updatedAt: e.updatedAt
+    }))
+  };
+  
+  const jsonData = JSON.stringify(exportData, null, 2);
+  fs.writeFileSync(filePath, jsonData, 'utf8');
+  
+  log.info('Data exported as JSON to:', filePath);
+  return true;
+}
+
+export function exportDataAsCsv(filePath: string): boolean {
+  if (!derivedKey) {
+    throw new Error('Not authenticated');
+  }
+  
+  const headers = ['name', 'url', 'username', 'password', 'notes', 'category', 'createdAt', 'updatedAt'];
+  const rows = entries.map(e => [
+    `"${(e.name || '').replace(/"/g, '"')}"`,
+    `"${(e.url || '').replace(/"/g, '"')}"`,
+    `"${(e.username || '').replace(/"/g, '"')}"`,
+    `"${(e.password || '').replace(/"/g, '"')}"`,
+    `"${(e.notes || '').replace(/"/g, '"')}"`,
+    `"${(e.category || '').replace(/"/g, '"')}"`,
+    `"${e.createdAt || ''}"`,
+    `"${e.updatedAt || ''}"`
+  ].join(','));
+  
+  const csv = [headers.join(','), ...rows].join('\n');
+  fs.writeFileSync(filePath, '\ufeff' + csv, 'utf8');
+  
+  log.info('Data exported as CSV to:', filePath);
+  return true;
+}
+
+function generateId(): string {
+  return crypto.randomUUID();
+}
+
+export function importDataFromJson(filePath: string): boolean {
+  if (!derivedKey) {
+    throw new Error('Not authenticated');
+  }
+  
+  const jsonContent = fs.readFileSync(filePath, 'utf8');
+  const importData = JSON.parse(jsonContent);
+  
+  for (const entry of importData.entries || []) {
+    const newEntry: PasswordEntry = {
+      id: generateId(),
+      name: entry.name || '',
+      url: entry.url || '',
+      username: entry.username || '',
+      password: entry.password || '',
+      notes: entry.notes || '',
+      category: entry.category || 'other',
+      createdAt: entry.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    const existingIndex = entries.findIndex(e => e.name === newEntry.name && e.username === newEntry.username);
+    if (existingIndex !== -1) {
+      entries[existingIndex] = newEntry;
+    } else {
+      entries.push(newEntry);
+    }
+  }
+  
+  saveData();
+  log.info('Data imported from JSON:', filePath);
+  return true;
+}
+
+export function importDataFromCsv(filePath: string): boolean {
+  if (!derivedKey) {
+    throw new Error('Not authenticated');
+  }
+  
+  const csvContent = fs.readFileSync(filePath, 'utf8');
+  const lines = csvContent.split('\n').filter(line => line.trim());
+  
+  if (lines.length < 2) {
+    throw new Error('CSV file is empty or invalid');
+  }
+  
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCSVLine(lines[i]);
+    if (values.length < headers.length) continue;
+    
+    const entry: Record<string, string> = {};
+    headers.forEach((header, index) => {
+      entry[header] = values[index] || '';
+    });
+    
+    const newEntry: PasswordEntry = {
+      id: generateId(),
+      name: entry.name || '',
+      url: entry.url || '',
+      username: entry.username || '',
+      password: entry.password || '',
+      notes: entry.notes || '',
+      category: entry.category || 'other',
+      createdAt: entry.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    const existingIndex = entries.findIndex(e => e.name === newEntry.name && e.username === newEntry.username);
+    if (existingIndex !== -1) {
+      entries[existingIndex] = newEntry;
+    } else {
+      entries.push(newEntry);
+    }
+  }
+  
+  saveData();
+  log.info('Data imported from CSV:', filePath);
+  return true;
+}
+
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+    
+    if (inQuotes) {
+      if (char === '"' && nextChar === '"') {
+        current += '"';
+        i++;
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        current += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        result.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+  }
+  
+  result.push(current);
+  return result;
+}
+
 export function importData(filePath: string): boolean {
   if (!derivedKey) {
     throw new Error('Not authenticated');

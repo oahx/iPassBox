@@ -94,6 +94,10 @@
   "settings": {
     "title": "Settings",
     "security": "Security Settings",
+    "theme": "Theme",
+    "themeDescription": "Select application theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
     "autoLockTimeout": "Auto-lock Timeout",
     "autoLockDescription": "Lock application after idle time",
     "changeMasterPassword": "Change Master Password",
@@ -123,6 +127,14 @@
     "tip2": "Regularly backup your data to prevent data loss",
     "tip3": "Use the password generator to create strong passwords",
     "tip4": "All your data is stored locally and will not be uploaded to the cloud"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "addNew": "Add new entry",
+    "search": "Focus search",
+    "lock": "Lock application",
+    "settings": "Open settings",
+    "escape": "Close modal"
   },
   "backup": {
     "export": "Export Data",

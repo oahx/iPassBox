@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { I18nProvider, useI18n } from './context/I18nContext';
+import { ThemeProvider } from './context/ThemeContext';
 import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage.tsx';
 import './styles/App.css';
@@ -61,11 +62,13 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <I18nProvider>
-        <AppContent />
-      </I18nProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <I18nProvider>
+          <AppContent />
+        </I18nProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

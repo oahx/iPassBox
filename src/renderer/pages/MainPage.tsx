@@ -48,6 +48,45 @@ function MainPage() {
     handleSearch();
   }, [searchQuery, selectedCategory]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'n':
+            e.preventDefault();
+            setShowAddModal(true);
+            break;
+          case 'f':
+            e.preventDefault();
+            document.querySelector<HTMLInputElement>('.search-box input')?.focus();
+            break;
+          case 'l':
+            e.preventDefault();
+            lock();
+            break;
+          case ',':
+            e.preventDefault();
+            setShowSettingsModal(true);
+            break;
+        }
+      } else {
+        if (e.key === 'Escape') {
+          setShowAddModal(false);
+          setShowSettingsModal(false);
+          setShowGeneratorModal(false);
+          setEditingEntry(null);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lock]);
+
   const loadEntries = async () => {
     try {
       setLoading(true);

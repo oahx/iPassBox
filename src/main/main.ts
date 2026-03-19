@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
 import * as path from 'path';
 import log from 'electron-log';
-import { initDatabase, addEntry, updateEntry, deleteEntry, getEntry, getAllEntries, searchEntries, getEntriesByCategory, initAuth, checkFirstTime, setMasterPassword, verifyMasterPassword, changeMasterPassword, getSettings, setSettings, clearKey, getKey, exportData, importData } from './modules/database';
+import { initDatabase, addEntry, updateEntry, deleteEntry, getEntry, getAllEntries, searchEntries, getEntriesByCategory, initAuth, checkFirstTime, setMasterPassword, verifyMasterPassword, changeMasterPassword, getSettings, setSettings, clearKey, getKey, exportData, importData, exportDataAsJson, exportDataAsCsv, importDataFromJson, importDataFromCsv } from './modules/database';
 import { generatePassword, calculateStrength } from './modules/generator';
 
 app.setName('iPassBox');
@@ -160,12 +160,23 @@ function setupIpcHandlers() {
       const result = await dialog.showSaveDialog(mainWindow!, {
         title: '导出密码数据',
         defaultPath: path.join(desktopPath, 'ipassbox-backup.vault'),
-        filters: [{ name: 'Vault Backup', extensions: ['vault'] }]
+        filters: [
+          { name: 'Vault Backup (Encrypted)', extensions: ['vault'] },
+          { name: 'JSON (Unencrypted)', extensions: ['json'] },
+          { name: 'CSV (Unencrypted)', extensions: ['csv'] }
+        ]
       });
       
       if (!result.canceled && result.filePath) {
         resetAutoLockTimer();
-        return exportData(result.filePath);
+        const ext = path.extname(result.filePath).toLowerCase();
+        if (ext === '.json') {
+          return exportDataAsJson(result.filePath);
+        } else if (ext === '.csv') {
+          return exportDataAsCsv(result.filePath);
+        } else {
+          return exportData(result.filePath);
+        }
       }
       return false;
     } catch (error) {
@@ -178,13 +189,25 @@ function setupIpcHandlers() {
     try {
       const result = await dialog.showOpenDialog(mainWindow!, {
         title: '导入密码数据',
-        filters: [{ name: 'Vault Backup', extensions: ['vault'] }],
+        filters: [
+          { name: 'Vault Backup', extensions: ['vault'] },
+          { name: 'JSON', extensions: ['json'] },
+          { name: 'All Files', extensions: ['*'] }
+        ],
         properties: ['openFile']
       });
       
       if (!result.canceled && result.filePaths[0]) {
         resetAutoLockTimer();
-        return importData(result.filePaths[0]);
+        const filePath = result.filePaths[0];
+        const ext = path.extname(filePath).toLowerCase();
+        if (ext === '.json') {
+          return importDataFromJson(filePath);
+        } else if (ext === '.csv') {
+          return importDataFromCsv(filePath);
+        } else {
+          return importData(filePath);
+        }
       }
       return false;
     } catch (error) {

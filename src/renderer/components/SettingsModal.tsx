@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '../context/I18nContext';
+import { useTheme } from '../context/ThemeContext';
 import LanguageSelector from './LanguageSelector';
 import type { AppSettings } from '@shared/types';
 import './SettingsModal.css';
@@ -10,6 +11,7 @@ interface SettingsModalProps {
 
 function SettingsModal({ onClose }: SettingsModalProps) {
   const { t } = useI18n();
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState<AppSettings>({
     autoLockTimeout: 5,
     theme: 'light'
@@ -121,6 +123,20 @@ function SettingsModal({ onClose }: SettingsModalProps) {
             
             <div className="setting-item">
               <div className="setting-info">
+                <label>{t('settings.theme')}</label>
+                <p>{t('settings.themeDescription')}</p>
+              </div>
+              <select
+                value={theme}
+                onChange={(e) => setTheme(e.target.value as 'light' | 'dark')}
+              >
+                <option value="light">{t('settings.themeLight')}</option>
+                <option value="dark">{t('settings.themeDark')}</option>
+              </select>
+            </div>
+
+            <div className="setting-item">
+              <div className="setting-info">
                 <label>{t('settings.autoLockTimeout')}</label>
                 <p>{t('settings.autoLockDescription')}</p>
               </div>
@@ -204,6 +220,32 @@ function SettingsModal({ onClose }: SettingsModalProps) {
               <div className="about-item">
                 <span className="about-label">{t('settings.dataStorage')}</span>
                 <span className="about-value">{t('settings.dataStorage').includes('本地') ? '本地加密存储' : 'Local Encrypted Storage'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="settings-section">
+            <h3>{t('shortcuts.title')}</h3>
+            <div className="shortcuts-list">
+              <div className="shortcut-item">
+                <span className="shortcut-action">{t('shortcuts.addNew')}</span>
+                <kbd>Ctrl+N</kbd>
+              </div>
+              <div className="shortcut-item">
+                <span className="shortcut-action">{t('shortcuts.search')}</span>
+                <kbd>Ctrl+F</kbd>
+              </div>
+              <div className="shortcut-item">
+                <span className="shortcut-action">{t('shortcuts.lock')}</span>
+                <kbd>Ctrl+L</kbd>
+              </div>
+              <div className="shortcut-item">
+                <span className="shortcut-action">{t('shortcuts.settings')}</span>
+                <kbd>Ctrl+,</kbd>
+              </div>
+              <div className="shortcut-item">
+                <span className="shortcut-action">{t('shortcuts.escape')}</span>
+                <kbd>Esc</kbd>
               </div>
             </div>
           </div>
