@@ -19,12 +19,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkFirstTime = async () => {
       try {
-        console.log('Testing IPC connection...');
-        const pong = await window.electronAPI.ping();
-        console.log('IPC ping result:', pong);
+        await window.electronAPI.ping();
         
         const firstTime = await window.electronAPI.checkFirstTime();
-        console.log('checkFirstTime result:', firstTime);
         setIsFirstTime(firstTime);
       } catch (error) {
         console.error('Failed to check first time:', error);
@@ -51,7 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setMasterPassword = useCallback(async (password: string): Promise<boolean> => {
     try {
       const result = await window.electronAPI.setMasterPassword(password);
-      console.log('setMasterPassword result:', result);
       if (result) {
         setIsAuthenticated(true);
         setIsFirstTime(false);

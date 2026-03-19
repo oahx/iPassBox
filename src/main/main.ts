@@ -7,15 +7,15 @@ import { generatePassword, calculateStrength } from './modules/generator';
 app.setName('iPassBox');
 
 log.initialize({ preload: true });
-log.transports.file.level = false;
-log.transports.console.level = 'debug';
+log.transports.file.level = 'error';
+log.transports.console.level = false;
 log.info('Application starting...');
 
 let mainWindow: BrowserWindow | null = null;
 let autoLockTimer: NodeJS.Timeout | null = null;
 
 function createWindow() {
-  const isDev = true;
+  const isDev = !app.isPackaged;
   
   mainWindow = new BrowserWindow({
     width: 1000,
@@ -82,9 +82,9 @@ function setupIpcHandlers() {
   ipcMain.handle('auth:set-master-password', async (_, password: string) => {
     try {
       log.info('Setting master password...');
-      const result = setMasterPassword(password);
-      log.info('Master password set result:', result);
-      return result;
+      setMasterPassword(password);
+      log.info('Master password set successfully');
+      return true;
     } catch (error) {
       log.error('Error setting master password:', error);
       throw error;

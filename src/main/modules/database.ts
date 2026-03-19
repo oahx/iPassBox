@@ -29,10 +29,30 @@ function initPaths(): void {
   authFilePath = path.join(dataPath, 'auth.json');
 }
 
+const ENCRYPTED_VERSION = '1.0';
+
 function loadData(): void {
   try {
     if (fs.existsSync(dataFilePath)) {
-      const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+      const content = fs.readFileSync(dataFilePath, 'utf8').trim();
+      let data;
+      
+      if (content.startsWith('{') && content.includes('"version"')) {
+        const parsed = JSON.parse(content);
+        if (parsed.version && parsed.version.startsWith(ENCRYPTED_VERSION)) {
+          throw new Error('Encrypted data but no key available');
+        }
+        data = parsed;
+      } else if (content.includes(':')) {
+        if (!derivedKey) {
+          throw new Error('Encrypted data requires authentication');
+        }
+        const jsonData = decrypt(content);
+        data = JSON.parse(jsonData);
+      } else {
+        throw new Error('Invalid data format');
+      }
+      
       entries = data.entries || [];
       settings = data.settings || { autoLockTimeout: 5, theme: 'light' };
     }
@@ -45,8 +65,10 @@ function loadData(): void {
 
 function saveData(): void {
   try {
-    const data = { entries, settings };
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+    const data = { version: ENCRYPTED_VERSION, entries, settings };
+    const jsonData = JSON.stringify(data, null, 2);
+    const encrypted = encrypt(jsonData);
+    fs.writeFileSync(dataFilePath, encrypted);
   } catch (error) {
     log.error('Failed to save data:', error);
   }
@@ -217,7 +239,7 @@ export function addEntry(entry: Omit<PasswordEntry, 'id' | 'createdAt' | 'update
   entries.unshift(newEntry);
   saveData();
   
-  log.info('Entry added:', id);
+  log.info('Entry added');
   
   return newEntry;
 }
@@ -236,7 +258,7 @@ export function updateEntry(entry: PasswordEntry): PasswordEntry {
     saveData();
   }
   
-  log.info('Entry updated:', entry.id);
+  log.info('Entry updated');
   
   return updatedEntry;
 }
@@ -250,7 +272,7 @@ export function deleteEntry(id: string): boolean {
   if (index !== -1) {
     entries.splice(index, 1);
     saveData();
-    log.info('Entry deleted:', id);
+    log.info('Entry deleted');
     return true;
   }
   
